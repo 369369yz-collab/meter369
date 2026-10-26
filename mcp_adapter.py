@@ -178,16 +178,25 @@ def serve_stdio():
 
 
 # ------------------------------------------------------- streamable HTTP
+MAX_BODY_BYTES = 1_000_000  # anti-hack H-1 (2026-10-26): cap the unauthenticated body read
+
+
 def application(environ, start_response):
     if environ.get("REQUEST_METHOD") != "POST":
         start_response("405 Method Not Allowed", [("Content-Type", "application/json")])
         return [b'{"error":"POST only"}']
     try:
         length = int(environ.get("CONTENT_LENGTH") or 0)
+    except (TypeError, ValueError):
+        length = -1
+    if length < 0 or length > MAX_BODY_BYTES:
+        start_response("413 Payload Too Large", [("Content-Type", "application/json")])
+        return [b'{"error":"body too large"}']
+    try:
         payload = json.loads(environ["wsgi.input"].read(length).decode() or "{}")
-    except Exception as e:
+    except Exception:
         start_response("400 Bad Request", [("Content-Type", "application/json")])
-        return [json.dumps({"error": f"bad json: {e}"}).encode()]
+        return [b'{"error":"bad json"}']
     resp = handle(payload)
     if resp is None:
         start_response("202 Accepted", [("Content-Type", "application/json")])
