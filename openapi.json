@@ -1,0 +1,62 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "369 Meter — Pay-per-call APIs for Agents",
+    "version": "1.0.0",
+    "description": "Four pay-per-call APIs served by one x402 gateway (x402 v1, USDC on Base, facilitator payai-public). Every paid route returns HTTP 402 with x402 payment requirements when called without an X-PAYMENT header; the resource is served only after the facilitator confirms settlement. Prices: TextIntel $0.01/call, HookScore $0.01/call, TranslationCheck $0.02/call, GameFacts $0.03/call. PayTo: 0xA0A1ff293EF2FF051121674c8eAAd69570b25e6c (Base).",
+    "contact": {"name": "VeritasWorks", "email": "369369yz@gmail.com"}
+  },
+  "servers": [{"url": "https://369yz.pythonanywhere.com/meter", "description": "Production (PythonAnywhere)"}],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "meterHealth", "summary": "Gateway health (free)",
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"example": {"ok": true, "service": "meter-gateway", "services": ["/v1/game/facts", "/v1/hook/score", "/v1/text/analyze", "/v1/translate/check"], "facilitator": "payai-public", "facilitator_configured": true, "payTo": "0xA0A1ff293EF2FF051121674c8eAAd69570b25e6c"}}}}}
+      }
+    },
+    "/v1/text/analyze": {
+      "post": {
+        "operationId": "textAnalyze", "summary": "TextIntel — deterministic text analysis ($0.01/call, x402)",
+        "description": "Deterministic text analysis: counts, readability (Flesch), script mix, top keywords. Payment: x402 v1 exact, 10000 micro-USDC on Base.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"text": {"type": "string", "maxLength": 20000}}, "required": ["text"]}, "example": {"text": "Grand Theft Auto VI is an upcoming action-adventure game developed by Rockstar Games."}}}},
+        "responses": {
+          "200": {"description": "Analysis result (returned only after x402 settlement)", "content": {"application/json": {"example": {"analysis": {"characters": 96, "words": 15, "sentences": 1, "flesch_reading_ease": 40.2, "script_mix": {"latin": 1.0}, "top_keywords": [{"word": "rockstar", "count": 1}]}}}}},
+          "402": {"description": "x402 payment required — response body contains x402Version, accepts[] payment requirements and extensions.bazaar discovery declaration"}
+        }
+      }
+    },
+    "/v1/hook/score": {
+      "post": {
+        "operationId": "hookScore", "summary": "HookScore — gaming hook scorer ($0.01/call, x402)",
+        "description": "Gaming headline/hook scored 0-100 against the 369 content team's hook rules. Payment: x402 v1 exact, 10000 micro-USDC on Base.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"headline": {"type": "string"}, "platform": {"type": "string", "default": "reels"}}, "required": ["headline"]}, "example": {"headline": "GTA 6 just got a secret nobody saw coming"}}}},
+        "responses": {
+          "200": {"description": "Score result (returned only after x402 settlement)", "content": {"application/json": {"example": {"score": 75, "verdict": "tighten", "findings": [{"rule": "curiosity_gap", "points": 15, "note": "open loop present"}]}}}},
+          "402": {"description": "x402 payment required — see TextIntel 402 description"}
+        }
+      }
+    },
+    "/v1/translate/check": {
+      "post": {
+        "operationId": "translateCheck", "summary": "TranslationCheck — EN<->FA translation QA ($0.02/call, x402)",
+        "description": "EN<->FA translation QA score 0-100: numbers/entities preserved, script purity, untranslated segments (deterministic heuristics). Payment: x402 v1 exact, 20000 micro-USDC on Base.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"source_text": {"type": "string"}, "target_text": {"type": "string"}}, "required": ["source_text", "target_text"]}, "example": {"source_text": "The game launches on March 3 with 12 new maps.", "target_text": "بازی در ۳ مارس با ۱۲ نقشه‌ی جدید عرضه می‌شود."}}}},
+        "responses": {
+          "200": {"description": "QA result (returned only after x402 settlement)", "content": {"application/json": {"example": {"direction": "en->fa", "score": 92, "verdict": "publishable", "issues": []}}}},
+          "402": {"description": "x402 payment required — see TextIntel 402 description"}
+        }
+      }
+    },
+    "/v1/game/facts": {
+      "post": {
+        "operationId": "gameFacts", "summary": "GameFacts — live game metadata ($0.03/call, x402)",
+        "description": "Live game metadata from RAWG: release date, ratings, Metacritic, platforms, genres. Payment: x402 v1 exact, 30000 micro-USDC on Base.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 5, "default": 3}}, "required": ["query"]}, "example": {"query": "The Witcher 3"}}}},
+        "responses": {
+          "200": {"description": "Game facts (returned only after x402 settlement)", "content": {"application/json": {"example": {"query": "The Witcher 3", "match": "The Witcher 3: Wild Hunt", "facts": {"released": "2015-05-18", "rating": 4.64, "metacritic": 92, "platforms": ["PC", "PlayStation 5"], "genres": ["Action", "RPG"]}}}}},
+          "402": {"description": "x402 payment required — see TextIntel 402 description"}
+        }
+      }
+    }
+  }
+}

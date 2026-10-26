@@ -1,0 +1,8 @@
+# Smithery: this server is published as an EXTERNAL (URL) release via the
+# web wizard at https://smithery.ai/new — Smithery no longer needs to build
+# or host it. Remote MCP endpoint (once deployed on the gateway host):
+#   https://369yz.pythonanywhere.com/meter/mcp   (streamable HTTP)
+# No configuration parameters: payment is per-call over x402 (USDC on Base)
+# on the REST routes; the MCP tools/call returns the 402 requirements.
+startCommand:
+  type: http

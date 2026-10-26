@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.369369yz-collab/meter369",
+  "title": "369 Meter — pay-per-call APIs for agents (x402)",
+  "description": "Pay-per-call APIs for agents: text analysis, game facts, translation QA, hook scoring via x402.",
+  "version": "1.0.0",
+  "websiteUrl": "https://369yz.pythonanywhere.com/meter/",
+  "repository": {
+    "url": "https://github.com/369369yz-collab/meter369",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://369yz.pythonanywhere.com/meter/mcp"
+    }
+  ]
+}
